@@ -1,2 +1,2 @@
-# translateREADME
+# README翻訳所
 気になったリポジトリのREADMEを日本語訳しておくとこ
