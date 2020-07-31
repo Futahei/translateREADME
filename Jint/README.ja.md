@@ -117,67 +117,67 @@ engine.SetValue("TheType", TypeReference.CreateTypeReference(engine, typeof(TheT
     jint> list.Count;  // 2
 ```
 
-## Internationalization
+## 国際化
 
-You can enforce what Time Zone or Culture the engine should use when locale JavaScript methods are used if you don't want to use the computer's default values.
+`TimeZone` や `Culture` に関して、コンピューターの既定値を使いたくない場合、自身で設定することができます。
 
-This example forces the Time Zone to Pacific Standard Time.
+この例では、`TimeZone` を太平洋標準時に変更しています。
 ```c#
     var PST = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
     var engine = new Engine(cfg => cfg.LocalTimeZone(PST));
-    
+
     engine.Execute("new Date().toString()"); // Wed Dec 31 1969 16:00:00 GMT-08:00
 ```
 
-This example is using French as the default culture.
+この例では、`Culture` をフランスのものに変更しています。
 ```c#
     var FR = CultureInfo.GetCultureInfo("fr-FR");
     var engine = new Engine(cfg => cfg.Culture(FR));
-    
+
     engine.Execute("new Number(1.23).toString()"); // 1.23
     engine.Execute("new Number(1.23).toLocaleString()"); // 1,23
 ```
 
-## Constraints 
+## 制約
 
-Constraints are used during script execution to ensure that requirements around resource consumption are met, for example:
+制約は、スクリプトの実行中に使用され、リソース消費に関する要件を確実に満たすために使用されます。例えば、
 
-* Scripts should not use more than X memory.
-* Scripts should only run for a maximum amount of time.
+* スクリプトは設定した以上のメモリを使用してはいけません。
+* スクリプトは設定した最大の時間以上実行されません。
 
-You can configure them via the options:
+これらはオプションから設定することができます。
 
 ```c#
 var engine = new Engine(options => {
 
-    // Limit memory allocations to MB
+    // メモリの割り当てを4MBに制限します
     options.LimitMemory(4_000_000);
 
-    // Set a timeout to 4 seconds.
+    // タイムアウトを4秒に設定します
     options.TimeoutInterval(TimeSpan.FromSeconds(4));
 
-    // Set limit of 1000 executed statements.
+    // 最大ステートメントを1000に設定します
     options.MaxStatements(1000);
 
-    // Use a cancellation token.
+    // キャンセルトークンを使用します
     options.CancellationToken(cancellationToken);
 }
 ```
 
-You can also write a custom constraint by implementing the `IConstraint` interface:
+`IConstraint` インターフェースを実装することで、カスタム制約を使用することができます。
 
 ```c#
 public interface IConstraint
 {
-    /// Called before a script is executed and useful when you us an engine object for multiple executions.
+    /// スクリプトが実行される前に呼び出されます。エンジンで複数回実行をする場合便利です。
     void Reset();
 
-    // Called before each statement to check if your requirements are met.
+    // 各ステートメントの前に呼び出され、要件が満たされているかどうかを確認します。
     void Check();
 }
 ```
 
-For example we can write a constraint that stops scripts when the CPU usage gets too high:
+例えば、CPU使用率が高くなりすぎたときにスクリプトを停止するような制約を書くことができます。
 
 ```c#
 class MyCPUConstraint : IConstraint
@@ -203,7 +203,7 @@ var engine = new Engine(options =>
 });
 ```
 
-When you reuse the engine you want to use cancellation tokens you have to reset the token before each call of `Execute`:
+キャンセルトークンを利用したエンジンを再利用する場合は、`Execute` を呼び出す前にトークンをリセットする必要があります。
 
 ```c#
 var constraint = new CancellationConstraint();
@@ -213,7 +213,7 @@ var engine = new Engine(options =>
     options.Constraint(constraint);
 });
 
-for (var i = 0; i < 10; i++) 
+for (var i = 0; i < 10; i++)
 {
     using (var tcs = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
     {
@@ -225,53 +225,53 @@ for (var i = 0; i < 10; i++)
 }
 ```
 
-## Implemented features:
+## 実装されている機能
 
 ### ECMAScript 5.1
 
-- Complete implementation
-  - ECMAScript 5.1 test suite (http://test262.ecmascript.org/) 
+- 全ての機能が実装されています。
+  - ECMAScript 5.1 test suite (http://test262.ecmascript.org/)
 
 ### ECMAScript 6.0
 
-ES6 features which are being implemented:
-- [x] [arrows](https://github.com/lukehoban/es6features/blob/master/README.md#arrows)
-- [ ] [classes](https://github.com/lukehoban/es6features/blob/master/README.md#classes)
-- [x] [enhanced object literals](https://github.com/lukehoban/es6features/blob/master/README.md#enhanced-object-literals)
-- [x] [template strings](https://github.com/lukehoban/es6features/blob/master/README.md#template-strings)
-- [x] [destructuring](https://github.com/lukehoban/es6features/blob/master/README.md#destructuring)
-- [x] [default + rest + spread](https://github.com/lukehoban/es6features/blob/master/README.md#default--rest--spread)
-- [x] [let + const](https://github.com/lukehoban/es6features/blob/master/README.md#let--const)
-- [x] [iterators + for..of](https://github.com/lukehoban/es6features/blob/master/README.md#iterators--forof)
-- [ ] [generators](https://github.com/lukehoban/es6features/blob/master/README.md#generators)
-- [ ] [unicode](https://github.com/lukehoban/es6features/blob/master/README.md#unicode)
-- [ ] [modules](https://github.com/lukehoban/es6features/blob/master/README.md#modules)
-- [ ] [module loaders](https://github.com/lukehoban/es6features/blob/master/README.md#module-loaders)
-- [x] [map + set](https://github.com/lukehoban/es6features/blob/master/README.md#map--set--weakmap--weakset)
-- [ ] [weakmap + weakset](https://github.com/lukehoban/es6features/blob/master/README.md#map--set--weakmap--weakset)
-- [x] [proxies](https://github.com/lukehoban/es6features/blob/master/README.md#proxies)
-- [x] [symbols](https://github.com/lukehoban/es6features/blob/master/README.md#symbols)
-- [ ] [subclassable built-ins](https://github.com/lukehoban/es6features/blob/master/README.md#subclassable-built-ins)
-- [ ] [promises](https://github.com/lukehoban/es6features/blob/master/README.md#promises)
-- [x] [math APIs](https://github.com/lukehoban/es6features/blob/master/README.md#math--number--string--array--object-apis)
-- [x] [number APIs](https://github.com/lukehoban/es6features/blob/master/README.md#math--number--string--array--object-apis)
-- [x] [string APIs](https://github.com/lukehoban/es6features/blob/master/README.md#math--number--string--array--object-apis)
-- [x] [array APIs](https://github.com/lukehoban/es6features/blob/master/README.md#math--number--string--array--object-apis)
-- [x] [object APIs](https://github.com/lukehoban/es6features/blob/master/README.md#math--number--string--array--object-apis)
-- [x] [binary and octal literals](https://github.com/lukehoban/es6features/blob/master/README.md#binary-and-octal-literals)
-- [x] [reflect api](https://github.com/lukehoban/es6features/blob/master/README.md#reflect-api)
-- [ ] [tail calls](https://github.com/lukehoban/es6features/blob/master/README.md#tail-calls)
+- 実装されている ES6 の機能
+  - [x] [arrows](https://github.com/lukehoban/es6features/blob/master/README.md#arrows)
+  - [ ] [classes](https://github.com/lukehoban/es6features/blob/master/README.md#classes)
+  - [x] [enhanced object literals](https://github.com/lukehoban/es6features/blob/master/README.md#enhanced-object-literals)
+  - [x] [template strings](https://github.com/lukehoban/es6features/blob/master/README.md#template-strings)
+  - [x] [destructuring](https://github.com/lukehoban/es6features/blob/master/README.md#destructuring)
+  - [x] [default + rest + spread](https://github.com/lukehoban/es6features/blob/master/README.md#default--rest--spread)
+  - [x] [let + const](https://github.com/lukehoban/es6features/blob/master/README.md#let--const)
+  - [x] [iterators + for..of](https://github.com/lukehoban/es6features/blob/master/README.md#iterators--forof)
+  - [ ] [generators](https://github.com/lukehoban/es6features/blob/master/README.md#generators)
+  - [ ] [unicode](https://github.com/lukehoban/es6features/blob/master/README.md#unicode)
+  - [ ] [modules](https://github.com/lukehoban/es6features/blob/master/README.md#modules)
+  - [ ] [module loaders](https://github.com/lukehoban/es6features/blob/master/README.md#module-loaders)
+  - [x] [map + set](https://github.com/lukehoban/es6features/blob/master/README.md#map--set--weakmap--weakset)
+  - [ ] [weakmap + weakset](https://github.com/lukehoban/es6features/blob/master/README.md#map--set--weakmap--weakset)
+  - [x] [proxies](https://github.com/lukehoban/es6features/blob/master/README.md#proxies)
+  - [x] [symbols](https://github.com/lukehoban/es6features/blob/master/README.md#symbols)
+  - [ ] [subclassable built-ins](https://github.com/lukehoban/es6features/blob/master/README.md#subclassable-built-ins)
+  - [ ] [promises](https://github.com/lukehoban/es6features/blob/master/README.md#promises)
+  - [x] [math APIs](https://github.com/lukehoban/es6features/blob/master/README.md#math--number--string--array--object-apis)
+  - [x] [number APIs](https://github.com/lukehoban/es6features/blob/master/README.md#math--number--string--array--object-apis)
+  - [x] [string APIs](https://github.com/lukehoban/es6features/blob/master/README.md#math--number--string--array--object-apis)
+  - [x] [array APIs](https://github.com/lukehoban/es6features/blob/master/README.md#math--number--string--array--object-apis)
+  - [x] [object APIs](https://github.com/lukehoban/es6features/blob/master/README.md#math--number--string--array--object-apis)
+  - [x] [binary and octal literals](https://github.com/lukehoban/es6features/blob/master/README.md#binary-and-octal-literals)
+  - [x] [reflect api](https://github.com/lukehoban/es6features/blob/master/README.md#reflect-api)
+  - [ ] [tail calls](https://github.com/lukehoban/es6features/blob/master/README.md#tail-calls)
 
-### .NET Interoperability
+### .NETとの相互作用
 
-- Manipulate CLR objects from JavaScript, including:
+- JavaScript から以下のような CLR オブジェクトを操作します。
   - Single values
   - Objects
     - Properties
     - Methods
   - Delegates
   - Anonymous objects
-- Convert JavaScript values to CLR objects
+- JavaScript の値を CLR オブジェクトに変換します。
   - Primitive values
   - Object -> expando objects (`IDictionary<string, object>` and dynamic)
   - Array -> object[]
@@ -282,22 +282,22 @@ ES6 features which are being implemented:
   - Regex -> RegExp
   - Function -> Delegate
 
-### Security
+### セキュリティ
 
-The following features provide you with a secure, sand-boxed environment to run user scripts.
+以下の機能により、ユーザースクリプトを実行するための安全なサンドボックス環境を提供します。
 
-- Define memory limits, to prevent allocations from depleting the memory.
-- Enable/disable usage of BCL to prevent scripts from invoking .NET code.
-- Limit number of statements to prevent infinite loops.
-- Limit depth of calls to prevent deep recursion calls.
-- Define a timeout, to prevent scripts from taking too long to finish.
+- メモリ制限を定義して、割り当てられたメモリが枯渇しないようにします。
+- スクリプトが .NET コードを呼び出すのを防ぐために、BCL (基本クラスライブラリ) の使用を有効または無効にします。
+- 無限ループを防ぐためにステートメントの数を制限します。
+- 呼び出しの深さを制限して、深い再帰呼び出しを防止します。
+- タイムアウトを定義し、スクリプトの終了に時間がかかりすぎないようにします。
 
-Continuous Integration kindly provided by  [AppVeyor](https://www.appveyor.com)
+継続的インテグレーションは [AppVeyor](https://www.appveyor.com) からのご厚意により提供されています。
 
-### Branches and releases
+### ブランチとリリース
 
-- The recommended branch is __dev__, any PR should target this branch
-- The __dev__ branch is automatically built and published on [Myget](https://www.myget.org/feed/Packages/jint)
-- The __dev__ branch is occasionally merged to __master__ and published on [NuGet](https://www.nuget.org/packages/jint)
-- The 3.x releases have more features (from es6) and is faster than the 2.x ones. They run the same test suite so they are as reliable. For instance [RavenDB](https://github.com/ravendb/ravendb) is using the 3.x version.
-- The 3.x versions are marked as _beta_ as they might get breaking changes while es6 features are added. 
+- 推奨されるブランチは __dev__ です。
+- __dev__ ブランチは自動的にビルドされて [Myget](https://www.myget.org/feed/Packages/jint) 上で公開されます。
+- __dev__ ブランチは時々 __master__ にマージされ、[NuGet](https://www.nuget.org/packages/jint) で公開入れています。
+- 3.x のリリースはより多くの機能(es6)を持ち、2.x のものよりも高速に動作します。これらのリリースは同じテストスイートを実行しているので、信頼性は同じです。例えば、[RavenDB](https://github.com/ravendb/ravendb) ではバージョン 3.x を使用しています。
+- バージョン 3.x は、es6 の機能が順次追加される間に様々な変更が加えられる可能性があるため、_ベータ_ 版として公開されています。
